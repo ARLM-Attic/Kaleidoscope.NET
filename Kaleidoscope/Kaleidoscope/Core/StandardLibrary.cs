@@ -12,7 +12,7 @@ namespace Kaleidoscope.Core
     public static class StandardLibrary
     {
         /// <summary>
-        /// Prints the given value to standard output and returns it
+        /// Prints the given value on a new line to standard output and returns it
         /// </summary>
         /// <param name="value">The value to print</param>
         /// <returns>The printed value</returns>
@@ -21,6 +21,17 @@ namespace Kaleidoscope.Core
             Console.WriteLine(value);
             return value;
         }
+
+		/// <summary>
+		/// Prints the given value to standard output and returns it
+		/// </summary>
+		/// <param name="value">The value to print</param>
+		/// <returns>The printed value</returns>
+		public static double Print(double value)
+		{
+			Console.Write(value);
+			return value;
+		}
 
         /// <summary>
         /// Adds the standard library to the given code generator
@@ -31,6 +42,7 @@ namespace Kaleidoscope.Core
             Type[] doubleArgumentType = new Type[] { typeof(double) };
 
             codeGenerator.Methods["println"] = typeof(StandardLibrary).GetMethod("Println", doubleArgumentType);
+			codeGenerator.Methods["print"] = typeof(StandardLibrary).GetMethod("Print", doubleArgumentType);
 
             Type mathType = typeof(Math);
             codeGenerator.Methods["sin"] = mathType.GetMethod("Sin", doubleArgumentType);

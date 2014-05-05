@@ -167,6 +167,11 @@ namespace Kaleidoscope.Core
 				return this.ParseIfExpression();
 			}
 
+			if (this.currentToken.Type == TokenType.For)
+			{
+				return this.ParseForExpression();
+			}
+
 			Console.WriteLine("unknown token when expecting an expression");
 			return null;
 		}

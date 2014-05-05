@@ -73,6 +73,27 @@ namespace Kaleidoscope.Core
 	}
 
 	/// <summary>
+	/// Represents an local variable symbol
+	/// </summary>
+	public class LocalVariableSymbol : Symbol
+	{
+		/// <summary>
+		/// Returns the local variable
+		/// </summary>
+		public LocalBuilder LocalVariable { get; private set; }
+
+		/// <summary>
+		/// Creates a new loop variable symbol
+		/// </summary>
+		/// <param name="argumentIndex">The local variable
+		/// </param>
+		public LocalVariableSymbol(LocalBuilder localVariable)
+		{
+			this.LocalVariable = localVariable;
+		}
+	}
+
+	/// <summary>
 	/// Contains generator data for an abstract syntax tree
 	/// </summary>
 	public class SyntaxTreeGeneratorData
@@ -114,7 +135,18 @@ namespace Kaleidoscope.Core
 		#endregion
 
 		#region Methods
-
+		/// <summary>
+		/// Adds the given symbol to the current symbol table
+		/// </summary>
+		/// <param name="symbolName">The name of the symbol</param>
+		/// <param name="symbol">The symbol</param>
+		/// <returns>A new generator with the added symbol</returns>
+		public SyntaxTreeGeneratorData WithSymbol(string symbolName, Symbol symbol)
+		{
+			Dictionary<string, Symbol> symbolTable = new Dictionary<string, Symbol>(this.SymbolTable);
+			symbolTable.Add(symbolName, symbol);
+			return new SyntaxTreeGeneratorData(this.ILGenerator, symbolTable);
+		}
 		#endregion
 
 	}

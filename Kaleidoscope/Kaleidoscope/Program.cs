@@ -15,8 +15,9 @@ namespace Kaleidoscope
         {
 			Lexer lexer = new Lexer();
 
-            var tokens = lexer.Tokenize("def fib(x) if x < 3 then 1 else fib(x-1)+fib(x-2); println(fib(8))");
+			var tokens = lexer.Tokenize("def fib(x) if x < 3 then 1 else fib(x-1)+fib(x-2); for i = 0, i < 15, 1.0 in println(fib(i));");
             //var tokens = lexer.Tokenize("def fib(x) if x < 3 then 1 else fib(x-1)+fib(x-2); fib(8)");
+			//var tokens = lexer.Tokenize("for i = 0, i < 5, 1.0 in print(5);");
 
 			Parser parser = new Parser(tokens);
 

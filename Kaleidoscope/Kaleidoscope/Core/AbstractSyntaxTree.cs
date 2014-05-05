@@ -142,10 +142,16 @@ namespace Kaleidoscope.Core
 			if (generatorData.SymbolTable.ContainsKey(this.Name))
 			{
 				FunctionArgumentSymbol argSymbol = generatorData.SymbolTable[this.Name] as FunctionArgumentSymbol;
+				LocalVariableSymbol varSymbol = generatorData.SymbolTable[this.Name] as LocalVariableSymbol;
 
 				if (argSymbol != null)
 				{
 					generatorData.ILGenerator.Emit(OpCodes.Ldarg, argSymbol.ArgumentIndex);
+				}
+
+				if (varSymbol != null)
+				{
+					generatorData.ILGenerator.Emit(OpCodes.Ldloc, varSymbol.LocalVariable);
 				}
 			}
 		}
@@ -636,7 +642,37 @@ namespace Kaleidoscope.Core
         #region Methods
         public override void GenerateCode(CodeGenerator codeGenerator, SyntaxTreeGeneratorData generatorData)
         {
-            throw new NotImplementedException();
+			LocalBuilder loopVar = generatorData.ILGenerator.DeclareLocal(typeof(double));
+			this.Start.GenerateCode(codeGenerator, generatorData);
+			generatorData.ILGenerator.Emit(OpCodes.Stloc, loopVar);
+			
+			//Add the loop variable
+			generatorData = generatorData.WithSymbol(this.VariableName, new LocalVariableSymbol(loopVar));
+
+			Label loopStart = generatorData.ILGenerator.DefineLabel();
+			Label end = generatorData.ILGenerator.DefineLabel();
+
+			//Emit the loop condition
+			generatorData.ILGenerator.MarkLabel(loopStart);
+			this.End.GenerateCode(codeGenerator, generatorData);
+			generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
+			generatorData.ILGenerator.Emit(OpCodes.Beq, end);
+
+			//The body
+			this.Body.GenerateCode(codeGenerator, generatorData);
+
+			//Pop any value returned from the body
+			generatorData.ILGenerator.Emit(OpCodes.Pop);
+
+			//The step
+			generatorData.ILGenerator.Emit(OpCodes.Ldloc, loopVar);
+			this.Step.GenerateCode(codeGenerator, generatorData);
+			generatorData.ILGenerator.Emit(OpCodes.Add);
+			generatorData.ILGenerator.Emit(OpCodes.Stloc, loopVar);
+			generatorData.ILGenerator.Emit(OpCodes.Br, loopStart);
+
+			generatorData.ILGenerator.MarkLabel(end);
+			generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
         }        
         #endregion
 
