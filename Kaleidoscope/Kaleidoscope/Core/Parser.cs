@@ -428,7 +428,7 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Parses a single tree from the loaded tokens
 		/// </summary>
-		/// <returns>An syntax tree</returns>
+		/// <returns>A syntax tree</returns>
 		public AbstractSyntaxTree ParseSingle()
 		{
 			this.NextToken();
@@ -459,7 +459,7 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Parses the loaded tokens
 		/// </summary>
-		/// <returns>An syntax tree</returns>
+		/// <returns>A syntax tree</returns>
 		public IEnumerable<AbstractSyntaxTree> Parse()
 		{
 			this.NextToken();

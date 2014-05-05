@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace Kaleidoscope.Core
 	{
 
 		#region Fields
-		private Dictionary<string, DynamicMethod> methods;
+		private Dictionary<string, MethodInfo> methods;
 		#endregion
 
 		#region Constructors
@@ -23,7 +24,7 @@ namespace Kaleidoscope.Core
 		/// </summary>
 		public CodeGenerator()
 		{
-			this.methods = new Dictionary<string, DynamicMethod>();
+			this.methods = new Dictionary<string, MethodInfo>();
 		}
 		#endregion
 
@@ -31,7 +32,7 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Returns the generated methods
 		/// </summary>
-		public Dictionary<string, DynamicMethod> Methods
+		public Dictionary<string, MethodInfo> Methods
 		{
 			get { return this.methods; }
 		}
@@ -72,7 +73,7 @@ namespace Kaleidoscope.Core
 	}
 
 	/// <summary>
-	/// Contains generator data for the current syntax tree
+	/// Contains generator data for an abstract syntax tree
 	/// </summary>
 	public class SyntaxTreeGeneratorData
 	{
@@ -115,5 +116,6 @@ namespace Kaleidoscope.Core
 		#region Methods
 
 		#endregion
+
 	}
 }

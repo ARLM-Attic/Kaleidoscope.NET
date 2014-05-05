@@ -434,7 +434,16 @@ namespace Kaleidoscope.Core
 			}
 
 			//Create the function
-			DynamicMethod function = new DynamicMethod(this.Prototype.Name, typeof(double), argumentTypes);
+            string funcName = this.Prototype.Name;
+            Type returnType = typeof(double);
+
+            if (funcName == "")
+            {
+                funcName = "main";
+                //returnType = null;
+            }
+
+            DynamicMethod function = new DynamicMethod(funcName, returnType, argumentTypes);
 			var generator = function.GetILGenerator();
 
 			Dictionary<string, Symbol> symbolTable = new Dictionary<string, Symbol>();
@@ -443,13 +452,6 @@ namespace Kaleidoscope.Core
 			{
 				string currentArg = this.Prototype.Arguments[i];
 				symbolTable.Add(currentArg, new FunctionArgumentSymbol(i));
-			}
-
-			string funcName = this.Prototype.Name;
-
-			if (funcName == "")
-			{
-				funcName = "main";
 			}
 
 			codeGenerator.Methods.Add(funcName, function);

@@ -45,6 +45,7 @@
     <Compile Include="Core\CodeGenerator.cs" />
     <Compile Include="Core\Lexer.cs" />
     <Compile Include="Core\Parser.cs" />
+    <Compile Include="Core\StandardLibrary.cs" />
     <Compile Include="Core\Token.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -89,8 +89,8 @@ namespace Kaleidoscope.Core
         /// Tokenizes the given string
         /// </summary>
         /// <param name="str">The string</param>
-        /// <returns>A list of the tokens</returns>
-        public IEnumerable<Token> TokenizeString(string str)
+        /// <returns>A sequence of the tokens</returns>
+        public IEnumerable<Token> Tokenize(string str)
         {
 			char? currentChar = ' ';
 			int i = -1;
