@@ -19,7 +19,9 @@ namespace Kaleidoscope.Core
 		Character,
 		If,
 		Then,
-		Else
+		Else,
+        For,
+        In
     }
 
     /// <summary>

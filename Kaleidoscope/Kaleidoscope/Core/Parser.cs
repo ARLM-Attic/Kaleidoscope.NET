@@ -198,7 +198,7 @@ namespace Kaleidoscope.Core
 
 			CharacterToken charToken = this.currentToken as CharacterToken;
 
-			if (charToken != null && charToken.Value != ')')
+			if ((charToken != null && charToken.Value != ')') ||charToken == null)
 			{
 				Console.WriteLine("expected ')'");
 				return null;
@@ -222,7 +222,7 @@ namespace Kaleidoscope.Core
 			CharacterToken charToken = this.currentToken as CharacterToken;
 
 			//Simple variable ref
-			if (charToken != null && charToken.Value != '(' || charToken == null)
+			if ((charToken != null && charToken.Value != '(') || charToken == null)
 			{
 				return new VariableExpressionSyntaxTree(identifierName);
 			}
@@ -251,7 +251,7 @@ namespace Kaleidoscope.Core
 						break;
 					}
 
-					if (charToken != null && charToken.Value != ',')
+					if ((charToken != null && charToken.Value != ',') || charToken == null)
 					{
 						Console.WriteLine("Expected ')' or ',' in argument list");
 						return null;
@@ -285,7 +285,7 @@ namespace Kaleidoscope.Core
 
 			CharacterToken charToken = this.currentToken as CharacterToken;
 			
-			if (charToken != null && charToken.Value != '(')
+			if ((charToken != null && charToken.Value != '(') || charToken == null)
 			{
 				Console.WriteLine("Expected '(' in prototype");
 				return null;
@@ -312,7 +312,7 @@ namespace Kaleidoscope.Core
 
 			charToken = this.currentToken as CharacterToken;
 
-			if (charToken != null && charToken.Value != ')')
+			if ((charToken != null && charToken.Value != ')') || charToken == null)
 			{
 				Console.WriteLine("Expected ')' in prototype");
 				return null;
@@ -406,6 +406,92 @@ namespace Kaleidoscope.Core
 
 			return new IfExpressionSyntaxTree(cond, thenBody, elseBody);
 		}
+
+        /// <summary>
+        /// Parses a for expression
+        /// </summary>
+        /// <returns>An expression syntax tree</returns>
+        private ExpressionSyntaxTree ParseForExpression()
+        {
+            this.NextToken(); //Consume the for
+
+            if (this.currentToken.Type != TokenType.Identifier)
+            {
+                Console.WriteLine("expected identifier after for");
+                return null;
+            }
+
+            string varName = ((IdentifierToken)this.currentToken).Value;
+
+            this.NextToken(); //Consume the identifier
+
+            CharacterToken charToken = this.currentToken as CharacterToken;
+
+            if ((charToken != null && charToken.Value != '=') ||charToken == null)
+            {
+                Console.WriteLine("expected '=' after for");
+                return null;
+            }
+
+            this.NextToken(); //Consume the '='
+
+            ExpressionSyntaxTree startExpression = this.ParseExpression();
+
+            if (startExpression == null)
+            {
+                return null;
+            }
+
+            charToken = this.currentToken as CharacterToken;
+
+            if ((charToken != null && charToken.Value != ',') ||charToken == null)
+            {
+                Console.WriteLine("expected ',' after for start value");
+                return null;
+            }
+
+            this.NextToken(); //Consume the ','
+
+            ExpressionSyntaxTree endExpression = this.ParseExpression();
+
+            if (endExpression == null)
+            {
+                return null;
+            }
+
+            //The step value is optional
+            ExpressionSyntaxTree stepExpression = null;
+
+            charToken = this.currentToken as CharacterToken;
+
+            if ((charToken != null && charToken.Value == ',') ||charToken == null)
+            {
+                this.NextToken(); //Consume the ','
+                stepExpression = this.ParseExpression();
+
+                if (stepExpression == null)
+                {
+                    return null;
+                }
+            }
+
+            if (this.currentToken.Type != TokenType.In)
+            {
+                Console.WriteLine("expected 'in' after for");
+                return null;
+            }
+
+            this.NextToken(); //Consume the 'in'
+
+            ExpressionSyntaxTree bodyExpression = this.ParseExpression();
+
+            if (bodyExpression == null)
+            {
+                return null;
+            }
+
+            return new ForExpressionSyntaxTree(varName, startExpression, endExpression, stepExpression, bodyExpression);
+        }
 
 		/// <summary>
 		/// Parses a top level expression

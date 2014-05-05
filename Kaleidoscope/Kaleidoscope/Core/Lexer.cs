@@ -13,7 +13,7 @@ namespace Kaleidoscope.Core
     public class Lexer
     {
 
-        #region Fields                                                              
+        #region Fields                                                     
         #endregion
 
         #region Constructors
@@ -158,6 +158,18 @@ namespace Kaleidoscope.Core
 							yield return new Token(TokenType.Else);
 							continue;
 						}
+
+                        if (identifierStr == "for")
+                        {
+                            yield return new Token(TokenType.For);
+                            continue;
+                        }
+
+                        if (identifierStr == "in")
+                        {
+                            yield return new Token(TokenType.In);
+                            continue;
+                        }
 
 						yield return new IdentifierToken(identifierStr);
 						continue;

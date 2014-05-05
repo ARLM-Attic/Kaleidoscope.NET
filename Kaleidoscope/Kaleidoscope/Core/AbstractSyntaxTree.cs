@@ -557,4 +557,88 @@ namespace Kaleidoscope.Core
 		#endregion
 
 	}
+
+    /// <summary>
+    /// Represents a for expression syntax tree
+    /// </summary>
+    public class ForExpressionSyntaxTree : ExpressionSyntaxTree
+    {
+
+        #region Fields
+        private readonly string variableName;
+        private readonly ExpressionSyntaxTree start;
+        private readonly ExpressionSyntaxTree end;
+        private readonly ExpressionSyntaxTree step;
+        private readonly ExpressionSyntaxTree body;
+        #endregion
+
+        #region Constructors
+        /// <summary>
+        /// Creates a new for expression syntax tree
+        /// </summary>
+        /// <param name="variableName">The name of the loop variable</param>
+        /// <param name="start">The start value</param>
+        /// <param name="end">The stop value</param>
+        /// <param name="step">The step</param>
+        /// <param name="body">The body</param>
+        public ForExpressionSyntaxTree(string variableName, ExpressionSyntaxTree start, ExpressionSyntaxTree end, ExpressionSyntaxTree step, ExpressionSyntaxTree body)
+        {
+            this.variableName = variableName;
+            this.start = start;
+            this.end = end;
+            this.step = step;
+            this.body = body;
+        }
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// Returns the name of the loop variable
+        /// </summary>
+        public string VariableName
+        {
+            get { return this.variableName; }
+        }
+
+        /// <summary>
+        /// Returns the start value
+        /// </summary>
+        public ExpressionSyntaxTree Start
+        {
+            get { return this.start; }
+        }
+
+        /// <summary>
+        /// Returns the end value
+        /// </summary>
+        public ExpressionSyntaxTree End
+        {
+            get { return this.end; }
+        }
+
+        /// <summary>
+        /// Returns the step value
+        /// </summary>
+        public ExpressionSyntaxTree Step
+        {
+            get { return this.step; }
+        }
+
+        /// <summary>
+        /// Returns the body
+        /// </summary>
+        public ExpressionSyntaxTree Body
+        {
+            get { return this.body; }
+        }
+        #endregion
+
+        #region Methods
+        public override void GenerateCode(CodeGenerator codeGenerator, SyntaxTreeGeneratorData generatorData)
+        {
+            throw new NotImplementedException();
+        }        
+        #endregion
+
+    }
 }
