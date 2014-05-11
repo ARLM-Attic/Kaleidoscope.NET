@@ -1,6 +1,7 @@
 ﻿using Kaleidoscope.Core;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -15,10 +16,11 @@ namespace Kaleidoscope
         {
 			Lexer lexer = new Lexer();
 
-			var tokens = lexer.Tokenize("def fib(x) if x < 3 then 1 else fib(x-1)+fib(x-2); for i = 0, i < 15, 1.0 in println(fib(i));");
+			//var tokens = lexer.Tokenize("def fib(x) if x < 3 then 1 else fib(x-1)+fib(x-2); for i = 0, i < 15, 1 in println(fib(i));");
             //var tokens = lexer.Tokenize("def fib(x) if x < 3 then 1 else fib(x-1)+fib(x-2); fib(8)");
-			//var tokens = lexer.Tokenize("for i = 0, i < 5, 1.0 in print(5);");
-
+			//var tokens = lexer.Tokenize("extern putchard(x) :: System.Console.Write; putchard(5)");
+			var tokens = lexer.Tokenize(File.ReadAllText("mandelbrot.txt"));
+	
 			Parser parser = new Parser(tokens);
 
 			CodeGenerator codeGenerator = new CodeGenerator();
@@ -26,11 +28,15 @@ namespace Kaleidoscope
 
 			foreach (var currentTree in parser.Parse())
 			{
+				//Console.WriteLine(currentTree);
 				currentTree.GenerateCode(codeGenerator, SyntaxTreeGeneratorData.Empty);
 			}
 
-			var mainMethod = codeGenerator.Methods["main"];
-            mainMethod.Invoke(null, null);
+			if (codeGenerator.Methods.ContainsKey("main"))
+			{
+				var mainMethod = codeGenerator.Methods["main"];
+				mainMethod.Invoke(null, null);
+			}
 
 			Console.ReadLine();
         }

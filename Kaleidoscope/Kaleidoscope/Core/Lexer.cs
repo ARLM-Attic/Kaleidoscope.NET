@@ -13,7 +13,7 @@ namespace Kaleidoscope.Core
     public class Lexer
     {
 
-        #region Fields                                                     
+        #region Fields
         #endregion
 
         #region Constructors
@@ -46,7 +46,7 @@ namespace Kaleidoscope.Core
 		/// <param name="getChar">The character</param>
 		private bool IsAlpha(char getChar)
 		{
-			return Regex.IsMatch("" + getChar, "[a-zA-Z]");
+			return Regex.IsMatch("" + getChar, "[a-zA-Z._]");
 		}
 
 		/// <summary>
@@ -55,7 +55,7 @@ namespace Kaleidoscope.Core
 		/// <param name="getChar">The character</param>
 		private bool IsAlphaNumeric(char getChar)
 		{
-			return Regex.IsMatch(getChar.ToString(), "[a-zA-Z0-9]");
+			return Regex.IsMatch(getChar.ToString(), "[a-zA-Z0-9._]");
 		}
 
 		/// <summary>

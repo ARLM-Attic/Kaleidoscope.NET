@@ -33,6 +33,17 @@ namespace Kaleidoscope.Core
 			return value;
 		}
 
+		/// <summary>
+		/// Prints the given ASCII character
+		/// </summary>
+		/// <param name="value">The ASCII character to print</param>
+		/// <returns>The printed value</returns>
+		public static double AsciiPrint(double value)
+		{
+			Console.Write((char)value);
+			return value;
+		}
+
         /// <summary>
         /// Adds the standard library to the given code generator
         /// </summary>

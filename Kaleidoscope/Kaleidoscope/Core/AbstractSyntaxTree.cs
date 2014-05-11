@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
@@ -306,7 +307,15 @@ namespace Kaleidoscope.Core
 				currentArg.GenerateCode(codeGenerator, generatorData);
 			}
 
-			generatorData.ILGenerator.EmitCall(OpCodes.Call, codeGenerator.Methods[this.FunctionName], null);
+			MethodInfo calledMethod = codeGenerator.Methods[this.FunctionName];
+
+			generatorData.ILGenerator.EmitCall(OpCodes.Call, calledMethod, null);
+
+			//Because the language is pure func, when we call inpure functions return 0
+			if (calledMethod.ReturnType == typeof(void))
+			{
+				generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
+			}
 		}
 
 		public override string ToString()
@@ -370,18 +379,31 @@ namespace Kaleidoscope.Core
 
 		}
 
-		public override string ToString()
+		/// <summary>
+		/// Returns a string representation of the current function prototype
+		/// </summary>
+		/// <param name="includeDef">True if to include the 'def' keyword</param>
+		public string ToString(bool includeDef)
 		{
 			string str = "";
 
 			if (this.Name != "" && this.Arguments.Count > 0)
 			{
-				str += "def ";
+				if (includeDef)
+				{
+					str += "def ";
+				}
+
 				str += this.Name;
 				str += "(" + string.Join(" ", this.Arguments) + ")";
 			}
 
 			return str;
+		}
+
+		public override string ToString()
+		{
+			return this.ToString(true);
 		}
 		#endregion
 
@@ -480,6 +502,70 @@ namespace Kaleidoscope.Core
 			}
 
 			return firstPart + this.Body.ToString();
+		}
+		#endregion
+
+	}
+
+	/// <summary>
+	/// Represents a external function syntax tree
+	/// </summary>
+	public class ExternalFunctionSyntaxTree : ExpressionSyntaxTree
+	{
+
+		#region Fields
+		private readonly PrototypeSyntaxTree prototype;
+		private readonly string funcReference;
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Creates a new external function syntax tree
+		/// </summary>
+		/// <param name="name">The prototype</param>
+		/// <param name="funcReference">The name of the external function</param>
+		public ExternalFunctionSyntaxTree(PrototypeSyntaxTree prototype, string funcReference)
+		{
+			this.prototype = prototype;
+			this.funcReference = funcReference;
+		}
+		#endregion
+
+		#region Properties
+		/// <summary>
+		/// Returns the prototype
+		/// </summary>
+		public PrototypeSyntaxTree Prototype
+		{
+			get { return this.prototype; }
+		}
+
+		/// <summary>
+		/// Returns the name of the external function
+		/// </summary>
+		public string FuncReference
+		{
+			get { return this.funcReference; }
+		}
+		#endregion
+
+		#region Methods
+		public override void GenerateCode(CodeGenerator codeGenerator, SyntaxTreeGeneratorData generatorData)
+		{
+			string[] splitedFuncRef = this.FuncReference.Split('.');
+			string funcClassName = string.Join(".", splitedFuncRef.Take(splitedFuncRef.Length - 1));
+			string funcName = splitedFuncRef.Last();
+
+			Type[] typeArgs = this.Prototype.Arguments.Select(_ => typeof(double)).ToArray();
+
+			Type funcClass = Type.GetType(funcClassName);
+			MethodInfo func = funcClass.GetMethod(funcName, typeArgs);
+			codeGenerator.Methods[this.Prototype.Name] = func;
+		}
+
+		public override string ToString()
+		{
+			return "extern " + this.Prototype.ToString(false) + " :: " +  this.FuncReference;
 		}
 		#endregion
 

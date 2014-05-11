@@ -356,11 +356,47 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Parses an extern 
 		/// </summary>
-		/// <returns>A prototype syntax tree</returns>
-		private PrototypeSyntaxTree ParseExtern()
+		/// <returns>A external function syntax tree</returns>
+		private ExternalFunctionSyntaxTree ParseExtern()
 		{
 			this.NextToken(); //Consume the extern
-			return this.ParsePrototype();
+
+			PrototypeSyntaxTree protoType = this.ParsePrototype();
+
+			CharacterToken charToken = this.currentToken as CharacterToken;
+
+			if ((charToken != null && charToken.Value != ':') || charToken == null)
+			{
+				Console.WriteLine("Expected ':' after extern");
+				return null;
+			}
+
+			//Consume the :
+			this.NextToken();
+
+			charToken = this.currentToken as CharacterToken;
+
+			if ((charToken != null && charToken.Value != ':') || charToken == null)
+			{
+				Console.WriteLine("Expected ':' after extern");
+				return null;
+			}
+
+			//Consume the :
+			this.NextToken();
+
+			if (this.currentToken.Type != TokenType.Identifier)
+			{
+				Console.WriteLine("Expected indentifier.");
+				return null;
+			}
+
+			string funcRef = ((IdentifierToken)this.currentToken).Value;
+
+			//Consume the identifier
+			this.NextToken();
+
+			return new ExternalFunctionSyntaxTree(protoType, funcRef);
 		}
 
 		/// <summary>
