@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -255,15 +256,9 @@ namespace Kaleidoscope.Core
 			//If not a builtin operator, generate a function call
 			if (!isBuiltinOperator)
 			{
-				MethodInfo calledMethod = codeGenerator.Methods["binary" + this.op];
-
-				generatorData.ILGenerator.EmitCall(OpCodes.Call, calledMethod, null);
-
-				//Because the language is pure func, when we call inpure functions return 0
-				if (calledMethod.ReturnType == typeof(void))
-				{
-					generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
-				}
+				codeGenerator.GenerateFunctionCall(
+					"binary" + this.op,
+					generatorData);
 			}
 		}
 
@@ -322,15 +317,9 @@ namespace Kaleidoscope.Core
 		{
 			this.Operand.GenerateCode(codeGenerator, generatorData);
 
-			MethodInfo calledMethod = codeGenerator.Methods["unary" + this.op];
-
-			generatorData.ILGenerator.EmitCall(OpCodes.Call, calledMethod, null);
-
-			//Because the language is pure func, when we call inpure functions return 0
-			if (calledMethod.ReturnType == typeof(void))
-			{
-				generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
-			}
+			codeGenerator.GenerateFunctionCall(
+				"unary" + this.op,
+				generatorData);
 		}
 
 		public override string ToString()
@@ -386,20 +375,14 @@ namespace Kaleidoscope.Core
 		#region Methods
 		public override void GenerateCode(CodeGenerator codeGenerator, SyntaxTreeGeneratorData generatorData)
 		{
-			foreach (var currentArg in this.Arguments)
+			foreach (var currentArg in arguments)
 			{
 				currentArg.GenerateCode(codeGenerator, generatorData);
 			}
 
-			MethodInfo calledMethod = codeGenerator.Methods[this.FunctionName];
-
-			generatorData.ILGenerator.EmitCall(OpCodes.Call, calledMethod, null);
-
-			//Because the language is pure func, when we call inpure functions return 0
-			if (calledMethod.ReturnType == typeof(void))
-			{
-				generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
-			}
+			codeGenerator.GenerateFunctionCall(
+				this.funcName,
+				generatorData);
 		}
 
 		public override string ToString()
@@ -423,7 +406,7 @@ namespace Kaleidoscope.Core
 
 		#region Fields
 		private readonly string name;
-		private readonly List<string> arguments;
+		private readonly IImmutableList<string> arguments;
 
 		private readonly bool isOperator;
 		private readonly int precedence;
@@ -437,10 +420,10 @@ namespace Kaleidoscope.Core
 		/// <param name="arguments">The arguments</param>
 		/// <param name="isOperator">Indicates if the current prototype is a operator</param>
 		/// <param name="precedence">The operator precedence</param>
-		public PrototypeSyntaxTree(string name, List<string> arguments, bool isOperator = false, int precedence = 0)
+		public PrototypeSyntaxTree(string name, IEnumerable<string> arguments, bool isOperator = false, int precedence = 0)
 		{
 			this.name = name;
-			this.arguments = arguments;
+			this.arguments = arguments.ToImmutableList();
 			this.isOperator = isOperator;
 			this.precedence = precedence;
 		}
@@ -458,9 +441,9 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Returns the arguments
 		/// </summary>
-		public IReadOnlyList<string> Arguments
+		public IImmutableList<string> Arguments
 		{
-			get { return this.arguments.AsReadOnly(); }
+			get { return this.arguments; }
 		}
 
 		/// <summary>
@@ -612,12 +595,12 @@ namespace Kaleidoscope.Core
             DynamicMethod function = new DynamicMethod(funcName, returnType, argumentTypes);
 			var generator = function.GetILGenerator();
 
-			Dictionary<string, Symbol> symbolTable = new Dictionary<string, Symbol>();
+			var symbolTable = ImmutableDictionary.Create<string, Symbol>();
 
 			for (int i = 0; i < this.Prototype.Arguments.Count; i++)
 			{
 				string currentArg = this.Prototype.Arguments[i];
-				symbolTable.Add(currentArg, new FunctionArgumentSymbol(i));
+				symbolTable = symbolTable.Add(currentArg, new FunctionArgumentSymbol(i));
 			}
 
 			codeGenerator.Methods.Add(funcName, function);

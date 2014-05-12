@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -50,7 +51,23 @@ namespace Kaleidoscope.Core
 		#endregion
 
 		#region Methods
-		
+		/// <summary>
+		/// Generates a function call
+		/// </summary>
+		/// <param name="functionName">The name of the function to call</param>
+		/// <param name="generatorData">The generator data for the current syntax tree</param>
+		public void GenerateFunctionCall(string functionName, SyntaxTreeGeneratorData generatorData)
+		{
+			MethodInfo calledMethod = this.Methods[functionName];
+
+			generatorData.ILGenerator.EmitCall(OpCodes.Call, calledMethod, null);
+
+			//Because the language is pure func, when we call inpure functions return 0
+			if (calledMethod.ReturnType == typeof(void))
+			{
+				generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
+			}
+		}
 		#endregion
 
 	}
@@ -119,7 +136,7 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Returns the symbol table
 		/// </summary>
-		public IDictionary<string, Symbol> SymbolTable { get; private set; }
+		public IImmutableDictionary<string, Symbol> SymbolTable { get; private set; }
 		#endregion
 
 		#region Constructors
@@ -128,7 +145,7 @@ namespace Kaleidoscope.Core
 		/// </summary>
 		/// <param name="ilGenerator">The IL generator</param>
 		/// <param name="symbolTable">The symbol table</param>
-		public SyntaxTreeGeneratorData(ILGenerator ilGenerator, IDictionary<string, Symbol> symbolTable)
+		public SyntaxTreeGeneratorData(ILGenerator ilGenerator, IImmutableDictionary<string, Symbol> symbolTable)
 		{
 			this.ILGenerator = ilGenerator;
 			this.SymbolTable = symbolTable;
@@ -141,7 +158,7 @@ namespace Kaleidoscope.Core
 		/// </summary>
 		public static SyntaxTreeGeneratorData Empty
 		{
-			get { return new SyntaxTreeGeneratorData(null, new Dictionary<string, Symbol>()); }
+			get { return new SyntaxTreeGeneratorData(null, ImmutableDictionary.Create<string, Symbol>()); }
 		}
 		#endregion
 
@@ -154,7 +171,7 @@ namespace Kaleidoscope.Core
 		/// <returns>A new generator with the added symbol</returns>
 		public SyntaxTreeGeneratorData WithSymbol(string symbolName, Symbol symbol)
 		{
-			Dictionary<string, Symbol> symbolTable = new Dictionary<string, Symbol>(this.SymbolTable);
+			var symbolTable = this.SymbolTable.Add(symbolName, symbol);
 			symbolTable.Add(symbolName, symbol);
 			return new SyntaxTreeGeneratorData(this.ILGenerator, symbolTable);
 		}
