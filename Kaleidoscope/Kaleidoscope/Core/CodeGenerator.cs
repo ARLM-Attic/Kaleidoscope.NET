@@ -171,9 +171,9 @@ namespace Kaleidoscope.Core
 		/// <returns>A new generator with the added symbol</returns>
 		public SyntaxTreeGeneratorData WithSymbol(string symbolName, Symbol symbol)
 		{
-			var symbolTable = this.SymbolTable.Add(symbolName, symbol);
-			symbolTable.Add(symbolName, symbol);
-			return new SyntaxTreeGeneratorData(this.ILGenerator, symbolTable);
+			return new SyntaxTreeGeneratorData(
+				this.ILGenerator,
+				this.SymbolTable.Add(symbolName, symbol));
 		}
 		#endregion
 

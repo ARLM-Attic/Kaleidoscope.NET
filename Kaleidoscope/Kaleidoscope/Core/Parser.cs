@@ -669,34 +669,13 @@ namespace Kaleidoscope.Core
 		}
 
 		/// <summary>
-		/// Parses a single tree from the loaded tokens
+		/// Resets the parser with the given tokens
 		/// </summary>
-		/// <returns>A syntax tree</returns>
-		public AbstractSyntaxTree ParseSingle()
+		/// <param name="tokens">The tokens</param>
+		public void Reset(IEnumerable<Token> tokens)
 		{
-			this.NextToken();
-
-			while (true)
-			{
-				CharacterToken charToken = this.currentToken as CharacterToken;
-
-				if (charToken != null && charToken.Value == ';')
-				{
-					this.NextToken();
-				}
-
-				switch (this.currentToken.Type)
-				{
-					case TokenType.Eof:
-						return null;
-					case TokenType.Def:
-						return this.ParseDefinition();
-					case TokenType.Extern:
-						return this.ParseExtern();
-					default:
-						return this.ParseTopLevelExpression();
-				}
-			}
+			this.tokens = tokens;
+			this.currentToken = null;
 		}
 
 		/// <summary>

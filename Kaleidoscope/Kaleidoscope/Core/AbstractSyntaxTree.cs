@@ -604,7 +604,7 @@ namespace Kaleidoscope.Core
 			}
 
 			codeGenerator.Methods.Add(funcName, function);
-
+			
 			//Emit the method
 			this.Body.GenerateCode(
 				codeGenerator,
