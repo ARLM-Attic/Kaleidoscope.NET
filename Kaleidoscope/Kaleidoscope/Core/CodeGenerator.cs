@@ -16,19 +16,30 @@ namespace Kaleidoscope.Core
 
 		#region Fields
 		private Dictionary<string, MethodInfo> methods;
+		private readonly Parser parser;
 		#endregion
 
 		#region Constructors
 		/// <summary>
 		/// Creates a new code generator
 		/// </summary>
-		public CodeGenerator()
+		/// <param name="parser">The parser</param>
+		public CodeGenerator(Parser parser)
 		{
+			this.parser = parser;
 			this.methods = new Dictionary<string, MethodInfo>();
 		}
 		#endregion
 
 		#region Properties
+		/// <summary>
+		/// Returns the parser for the generator
+		/// </summary>
+		public Parser Parser
+		{
+			get { return this.parser; }
+		}
+
 		/// <summary>
 		/// Returns the generated methods
 		/// </summary>

@@ -171,6 +171,18 @@ namespace Kaleidoscope.Core
                             continue;
                         }
 
+						if (identifierStr == "binary")
+						{
+							yield return new Token(TokenType.Binary);
+							continue;
+						}
+
+						if (identifierStr == "unary")
+						{
+							yield return new Token(TokenType.Unary);
+							continue;
+						}
+
 						yield return new IdentifierToken(identifierStr);
 						continue;
 					}

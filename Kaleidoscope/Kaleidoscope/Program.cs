@@ -23,12 +23,11 @@ namespace Kaleidoscope
 	
 			Parser parser = new Parser(tokens);
 
-			CodeGenerator codeGenerator = new CodeGenerator();
+			CodeGenerator codeGenerator = new CodeGenerator(parser);
             StandardLibrary.AddStandardLibrary(codeGenerator);
 
 			foreach (var currentTree in parser.Parse())
 			{
-				//Console.WriteLine(currentTree);
 				currentTree.GenerateCode(codeGenerator, SyntaxTreeGeneratorData.Empty);
 			}
 

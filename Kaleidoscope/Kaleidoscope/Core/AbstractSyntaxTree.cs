@@ -223,6 +223,7 @@ namespace Kaleidoscope.Core
 		{
 			this.LeftHandSide.GenerateCode(codeGenerator, generatorData);
 			this.RightHandSide.GenerateCode(codeGenerator, generatorData);
+			bool isBuiltinOperator = true;
 
 			switch (this.Operator)
 			{
@@ -246,12 +247,95 @@ namespace Kaleidoscope.Core
 					generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 1.0);
 					generatorData.ILGenerator.MarkLabel(endLabel);
 					break;
+				default:
+					isBuiltinOperator = false;
+					break;
+			}
+
+			//If not a builtin operator, generate a function call
+			if (!isBuiltinOperator)
+			{
+				MethodInfo calledMethod = codeGenerator.Methods["binary" + this.op];
+
+				generatorData.ILGenerator.EmitCall(OpCodes.Call, calledMethod, null);
+
+				//Because the language is pure func, when we call inpure functions return 0
+				if (calledMethod.ReturnType == typeof(void))
+				{
+					generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
+				}
 			}
 		}
 
 		public override string ToString()
 		{
 			return this.LeftHandSide.ToString() + this.Operator + this.RightHandSide.ToString();
+		}
+		#endregion
+
+	}
+
+	/// <summary>
+	/// Represents a unary expression syntax tree
+	/// </summary>
+	public class UnaryExpressionSyntaxTree : ExpressionSyntaxTree
+	{
+
+		#region Fields
+		private readonly char op;
+		private readonly ExpressionSyntaxTree operand;
+		#endregion
+
+		#region Constructors
+		/// <summary>
+		/// Creates a new unary expression syntax tree
+		/// </summary>
+		/// <param name="op">The operator</param>
+		/// <param name="operand">The operand</param>
+		public UnaryExpressionSyntaxTree(char op, ExpressionSyntaxTree operand)
+		{
+			this.op = op;
+			this.operand = operand;
+		}
+		#endregion
+
+		#region Properties
+		/// <summary>
+		/// Returns the operator
+		/// </summary>
+		public char Operator
+		{
+			get { return this.op; }
+		}
+
+		/// <summary>
+		/// Returns the operand
+		/// </summary>
+		public ExpressionSyntaxTree Operand
+		{
+			get { return this.operand; }
+		}
+		#endregion
+
+		#region Methods
+		public override void GenerateCode(CodeGenerator codeGenerator, SyntaxTreeGeneratorData generatorData)
+		{
+			this.Operand.GenerateCode(codeGenerator, generatorData);
+
+			MethodInfo calledMethod = codeGenerator.Methods["unary" + this.op];
+
+			generatorData.ILGenerator.EmitCall(OpCodes.Call, calledMethod, null);
+
+			//Because the language is pure func, when we call inpure functions return 0
+			if (calledMethod.ReturnType == typeof(void))
+			{
+				generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
+			}
+		}
+
+		public override string ToString()
+		{
+			return this.Operator + this.Operand.ToString();
 		}
 		#endregion
 
@@ -340,6 +424,9 @@ namespace Kaleidoscope.Core
 		#region Fields
 		private readonly string name;
 		private readonly List<string> arguments;
+
+		private readonly bool isOperator;
+		private readonly int precedence;
 		#endregion
 
 		#region Constructors
@@ -348,10 +435,14 @@ namespace Kaleidoscope.Core
 		/// </summary>
 		/// <param name="name">The name of the function</param>
 		/// <param name="arguments">The arguments</param>
-		public PrototypeSyntaxTree(string name, List<string> arguments)
+		/// <param name="isOperator">Indicates if the current prototype is a operator</param>
+		/// <param name="precedence">The operator precedence</param>
+		public PrototypeSyntaxTree(string name, List<string> arguments, bool isOperator = false, int precedence = 0)
 		{
 			this.name = name;
 			this.arguments = arguments;
+			this.isOperator = isOperator;
+			this.precedence = precedence;
 		}
 		#endregion
 
@@ -370,6 +461,54 @@ namespace Kaleidoscope.Core
 		public IReadOnlyList<string> Arguments
 		{
 			get { return this.arguments.AsReadOnly(); }
+		}
+
+		/// <summary>
+		/// Indicates if the current prototype is an operator
+		/// </summary>
+		public bool IsOperator
+		{
+			get { return this.isOperator; }
+		}
+
+		/// <summary>
+		/// Returns the precedence of the operator
+		/// </summary>
+		public int Precedence
+		{
+			get { return this.precedence; }
+		}
+
+		/// <summary>
+		/// Indicates if the current prototype is an unary operator
+		/// </summary>
+		public bool IsUnaryOperator
+		{
+			get { return this.isOperator && this.arguments.Count == 1; }
+		}
+
+		/// <summary>
+		/// Indicates if the current prototype is a binary operator
+		/// </summary>
+		public bool IsBinaryOperator
+		{
+			get { return this.isOperator && this.arguments.Count == 2; }
+		}
+
+		/// <summary>
+		/// Returns the name of operator if an operator else null
+		/// </summary>
+		public char? OperatorName
+		{
+			get
+			{
+				if (this.IsOperator)
+				{
+					return this.Name[this.Name.Length - 1];
+				}
+
+				return null;
+			}
 		}
 		#endregion
 
@@ -468,7 +607,6 @@ namespace Kaleidoscope.Core
             if (funcName == "")
             {
                 funcName = "main";
-                //returnType = null;
             }
 
             DynamicMethod function = new DynamicMethod(funcName, returnType, argumentTypes);
@@ -490,6 +628,14 @@ namespace Kaleidoscope.Core
 				new SyntaxTreeGeneratorData(generator, symbolTable));
 
 			generator.Emit(OpCodes.Ret);
+
+			//If a binary operator, add it to the operator table
+			if (this.Prototype.IsBinaryOperator)
+			{
+				codeGenerator.Parser.DefineBinaryOperator(
+					this.Prototype.OperatorName.Value,
+					this.Prototype.Precedence);
+			}
 		}
 
 		public override string ToString()

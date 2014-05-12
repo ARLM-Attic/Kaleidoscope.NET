@@ -21,7 +21,9 @@ namespace Kaleidoscope.Core
 		Then,
 		Else,
         For,
-        In
+        In,
+		Binary,
+		Unary
     }
 
     /// <summary>
