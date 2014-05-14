@@ -58,15 +58,45 @@ namespace Kaleidoscope.Core
 		/// <param name="generatorData">The generator data for the current syntax tree</param>
 		public void GenerateFunctionCall(string functionName, SyntaxTreeGeneratorData generatorData)
 		{
-			MethodInfo calledMethod = this.Methods[functionName];
-
-			generatorData.ILGenerator.EmitCall(OpCodes.Call, calledMethod, null);
-
-			//Because the language is pure func, when we call inpure functions return 0
-			if (calledMethod.ReturnType == typeof(void))
+			if (this.Methods.ContainsKey(functionName))
 			{
-				generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
+				MethodInfo calledMethod = this.Methods[functionName];
+
+				generatorData.ILGenerator.EmitCall(OpCodes.Call, calledMethod, null);
+
+				//Because the language is pure func, when we call inpure functions return 0
+				if (calledMethod.ReturnType == typeof(void))
+				{
+					generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
+				}
 			}
+			else
+			{
+				throw new CodeGeneratorException("Function '" + functionName + "' not found.");
+			}
+		}
+
+		/// <summary>
+		/// Defines a new binary operator
+		/// </summary>
+		/// <param name="operatorChar">The operator</param>
+		/// <param name="precedence">The precedence</param>
+		/// <param name="opFunc">The operation function</param>
+		public void DefineBinaryOperator(char operatorChar, int precedence, MethodInfo opFunc)
+		{
+			//Add the operator to the operator table
+			this.Parser.DefineBinaryOperator(operatorChar, precedence);
+			this.Methods["binary" + operatorChar] = opFunc;
+		}
+
+		/// <summary>
+		/// Defines a new unary operator
+		/// </summary>
+		/// <param name="operatorChar">The operator</param>
+		/// <param name="opFunc">The operation function</param>
+		public void DefineUnaryOperator(char operatorChar, MethodInfo opFunc)
+		{
+			this.Methods["unary" + operatorChar] = opFunc;
 		}
 		#endregion
 

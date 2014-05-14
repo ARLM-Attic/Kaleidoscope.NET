@@ -44,21 +44,49 @@ namespace Kaleidoscope.Core
 			return value;
 		}
 
+		/// <summary>
+		/// Closes the current program
+		/// </summary>
+		/// <param name="value">The exitCode</param>
+		//public static void Exit(double exitCode)
+		//{
+		//	System.Environment.Exit((int)exitCode);
+		//}
+		public static void Exit()
+		{
+			System.Environment.Exit(0);
+		}
+
+		/// <summary>
+		/// Negates the given value
+		/// </summary>
+		/// <param name="value">The value</param>
+		/// <returns>The negated value</returns>
+		public static double Negate(double value)
+		{
+			return -value;
+		}
+
         /// <summary>
         /// Adds the standard library to the given code generator
         /// </summary>
         /// <param name="codeGenerator">The code generator</param>
         public static void AddStandardLibrary(CodeGenerator codeGenerator)
         {
-            Type[] doubleArgumentType = new Type[] { typeof(double) };
+			Type standardLibraryType = typeof(StandardLibrary);
+		
+			Type[] doubleArgumentType = new Type[] { typeof(double) };
 
-            codeGenerator.Methods["println"] = typeof(StandardLibrary).GetMethod("Println", doubleArgumentType);
-			codeGenerator.Methods["print"] = typeof(StandardLibrary).GetMethod("Print", doubleArgumentType);
+			codeGenerator.Methods["println"] = standardLibraryType.GetMethod("Println", doubleArgumentType);
+			codeGenerator.Methods["print"] = standardLibraryType.GetMethod("Print", doubleArgumentType);
+			codeGenerator.Methods["exit"] = standardLibraryType.GetMethod("Exit");
 
             Type mathType = typeof(Math);
             codeGenerator.Methods["sin"] = mathType.GetMethod("Sin", doubleArgumentType);
             codeGenerator.Methods["cos"] = mathType.GetMethod("Cos", doubleArgumentType);
             codeGenerator.Methods["tan"] = mathType.GetMethod("Tan", doubleArgumentType);
+
+			//codeGenerator.DefineUnaryOperator('-', standardLibraryType.GetMethod("Negate"));
         }
     }
 }

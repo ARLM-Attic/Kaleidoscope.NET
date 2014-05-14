@@ -44,13 +44,13 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Defines a new binary operator
 		/// </summary>
-		/// <param name="operatorName">The operator</param>
+		/// <param name="operatorChar">The operator</param>
 		/// <param name="precedence">The precedence of the operator</param>
-		public void DefineBinaryOperator(char operatorName, int precedence)
+		public void DefineBinaryOperator(char operatorChar, int precedence)
 		{
-			if (!this.binaryOperatorPrecedence.ContainsKey(operatorName))
+			if (!this.binaryOperatorPrecedence.ContainsKey(operatorChar))
 			{
-				this.binaryOperatorPrecedence.Add(operatorName, precedence);
+				this.binaryOperatorPrecedence.Add(operatorChar, precedence);
 			}
 		}
 
@@ -61,15 +61,16 @@ namespace Kaleidoscope.Core
 		{
 			this.currentToken = this.tokens.FirstOrDefault();
 			this.tokens = this.tokens.Skip(1);
-		}
+		 }
 
 		/// <summary>
 		/// Parses an expression
 		/// </summary>
+		/// <param name="funcCall">Indicates if the primary is parsed in a function call</param>
 		/// <returns>An expression syntax tree</returns>
-		private ExpressionSyntaxTree ParseExpression()
+		private ExpressionSyntaxTree ParseExpression(bool funcCall = false)
 		{
-			ExpressionSyntaxTree leftHandSide = this.ParseUnary();
+			ExpressionSyntaxTree leftHandSide = this.ParseUnary(funcCall);
 
 			if (leftHandSide == null)
 			{
@@ -82,27 +83,28 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Parses an unary operator expression
 		/// </summary>
+		/// <param name="funcCall">Indicates if the primary is parsed in a function call</param>
 		/// <returns>An expression syntax tree</returns>
-		private ExpressionSyntaxTree ParseUnary()
+		private ExpressionSyntaxTree ParseUnary(bool funcCall = false)
 		{
 			//If the current token is not an operator, it must be a primary expression
 			CharacterToken charToken = this.currentToken as CharacterToken;
 
 			if (charToken == null)
 			{
-				return this.ParsePrimary();
+				return this.ParsePrimary(funcCall);
 			}
 
-			if (charToken != null && (charToken.Value == '(' || charToken.Value == ','))
+			if (charToken != null && (charToken.Value == '(' || charToken.Value == ')' || charToken.Value == ','))
 			{
-				return this.ParsePrimary();
+				return this.ParsePrimary(funcCall);
 			}
 
 			charToken = this.currentToken as CharacterToken;
 			char op = charToken.Value;
 			this.NextToken();
 
-			ExpressionSyntaxTree operand = this.ParseUnary();
+			ExpressionSyntaxTree operand = this.ParseUnary(funcCall);
 
 			if (operand == null)
 			{
@@ -190,8 +192,9 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Parses a primary expression
 		/// </summary>
+		/// <param name="funcCall">Indicates if the primary is parsed in a function call</param>
 		/// <returns>An expression syntax tree</returns>
-		private	ExpressionSyntaxTree ParsePrimary()
+		private	ExpressionSyntaxTree ParsePrimary(bool funcCall = false)
 		{
 			if (this.currentToken.Type == TokenType.Identifier)
 			{
@@ -223,8 +226,14 @@ namespace Kaleidoscope.Core
 				return this.ParseForExpression();
 			}
 
-			Console.WriteLine("unknown token when expecting an expression");
-			return null;
+			if (!funcCall)
+			{
+				throw new ParserException("unknown token when expecting an expression");
+			}
+			else
+			{
+				return null;
+			}
 		}
 
 		/// <summary>
@@ -289,16 +298,19 @@ namespace Kaleidoscope.Core
 
 			if (charToken != null && charToken.Value != ')')
 			{
-				while(true)
+				while (true)
 				{
-					ExpressionSyntaxTree arg = this.ParseExpression();
+					ExpressionSyntaxTree arg = this.ParseExpression(true);
 
-					if (arg == null)
+					//if (arg == null)
+					//{
+					//	return null;
+					//}
+
+					if (arg != null)
 					{
-						return null;
+						args.Add(arg);
 					}
-
-					args.Add(arg);
 
 					charToken = this.currentToken as CharacterToken;
 
@@ -309,8 +321,7 @@ namespace Kaleidoscope.Core
 
 					if ((charToken != null && charToken.Value != ',') || charToken == null)
 					{
-						Console.WriteLine("Expected ')' or ',' in argument list");
-						return null;
+						throw new ParserException("Expected ')' or ',' in argument list");
 					}
 
 					this.NextToken();
@@ -337,8 +348,7 @@ namespace Kaleidoscope.Core
 			switch (this.currentToken.Type)
 			{
 				default:
-					Console.WriteLine("Expected function name in prototype");
-					return null;
+					throw new ParserException("Expected function name in prototype");
 				case TokenType.Identifier:
 					funcName = ((IdentifierToken)this.currentToken).Value;
 					kind = 0;
@@ -351,8 +361,7 @@ namespace Kaleidoscope.Core
 
 					if (charToken == null)
 					{
-						Console.WriteLine("Expected binary operator");
-						return null;
+						throw new ParserException("Expected binary operator");
 					}
 
 					funcName = "binary" + charToken.Value;
@@ -366,8 +375,7 @@ namespace Kaleidoscope.Core
 					{
 						if (numToken.Value < 1 || numToken.Value > 100)
 						{
-							Console.WriteLine("Invalid precedecnce: must be 1..100");
-							return null;
+							throw new ParserException("Invalid precedecnce: must be 1..100");
 						}
 
 						binaryPrecedence = (int)numToken.Value;
@@ -375,8 +383,7 @@ namespace Kaleidoscope.Core
 					}
 					else
 					{
-						Console.WriteLine("Expected a number");
-						return null;
+						throw new ParserException("Expected a number");
 					}
 					break;
 				case TokenType.Unary:
@@ -386,8 +393,7 @@ namespace Kaleidoscope.Core
 
 					if (charToken == null)
 					{
-						Console.WriteLine("Expected unary operator");
-						return null;
+						throw new ParserException("Expected unary operator");
 					}
 
 					funcName = "unary" + charToken.Value;
@@ -401,8 +407,7 @@ namespace Kaleidoscope.Core
 
 			if ((charToken != null && charToken.Value != '(') || charToken == null)
 			{
-				Console.WriteLine("Expected '(' in prototype");
-				return null;
+				throw new ParserException("Expected '(' in prototype");
 			}
 
 			//Read the arguments
@@ -428,8 +433,7 @@ namespace Kaleidoscope.Core
 
 			if ((charToken != null && charToken.Value != ')') || charToken == null)
 			{
-				Console.WriteLine("Expected ')' in prototype");
-				return null;
+				throw new ParserException("Expected ')' in prototype");
 			}
 
 			this.NextToken(); //Consume the )
@@ -437,8 +441,7 @@ namespace Kaleidoscope.Core
 			//Verify the arguments is the same as the operator
 			if (kind != 0 && args.Count != kind)
 			{
-				Console.WriteLine("Invalid number of operands for operator");
-				return null;
+				throw new ParserException("Invalid number of operands for operator");
 			}
 
 			return new PrototypeSyntaxTree(funcName, args, kind != 0, binaryPrecedence);
@@ -483,8 +486,7 @@ namespace Kaleidoscope.Core
 
 			if ((charToken != null && charToken.Value != ':') || charToken == null)
 			{
-				Console.WriteLine("Expected ':' after extern");
-				return null;
+				throw new ParserException("Expected ':' after extern");
 			}
 
 			//Consume the :
@@ -494,8 +496,7 @@ namespace Kaleidoscope.Core
 
 			if ((charToken != null && charToken.Value != ':') || charToken == null)
 			{
-				Console.WriteLine("Expected ':' after extern");
-				return null;
+				throw new ParserException("Expected ':' after extern");
 			}
 
 			//Consume the :
@@ -503,8 +504,7 @@ namespace Kaleidoscope.Core
 
 			if (this.currentToken.Type != TokenType.Identifier)
 			{
-				Console.WriteLine("Expected indentifier.");
-				return null;
+				throw new ParserException("Expected indentifier.");
 			}
 
 			string funcRef = ((IdentifierToken)this.currentToken).Value;
@@ -533,8 +533,7 @@ namespace Kaleidoscope.Core
 
 			if (this.currentToken.Type != TokenType.Then)
 			{
-				Console.WriteLine("expected then");
-				return null;
+				throw new ParserException("expected then");
 			}
 
 			this.NextToken(); //Consume the then
@@ -548,8 +547,7 @@ namespace Kaleidoscope.Core
 
 			if (this.currentToken.Type != TokenType.Else)
 			{
-				Console.WriteLine("expected else");
-				return null;
+				throw new ParserException("expected else");
 			}
 
 			this.NextToken(); //Consume the else
@@ -574,8 +572,7 @@ namespace Kaleidoscope.Core
 
             if (this.currentToken.Type != TokenType.Identifier)
             {
-                Console.WriteLine("expected identifier after for");
-                return null;
+				throw new ParserException("expected identifier after for");
             }
 
             string varName = ((IdentifierToken)this.currentToken).Value;
@@ -586,8 +583,7 @@ namespace Kaleidoscope.Core
 
             if ((charToken != null && charToken.Value != '=') ||charToken == null)
             {
-                Console.WriteLine("expected '=' after for");
-                return null;
+				throw new ParserException("expected '=' after for");
             }
 
             this.NextToken(); //Consume the '='
@@ -603,8 +599,7 @@ namespace Kaleidoscope.Core
 
             if ((charToken != null && charToken.Value != ',') ||charToken == null)
             {
-                Console.WriteLine("expected ',' after for start value");
-                return null;
+				throw new ParserException("expected ',' after for start value");
             }
 
             this.NextToken(); //Consume the ','
@@ -634,8 +629,7 @@ namespace Kaleidoscope.Core
 
             if (this.currentToken.Type != TokenType.In)
             {
-                Console.WriteLine("expected 'in' after for");
-                return null;
+				throw new ParserException("expected 'in' after for");
             }
 
             this.NextToken(); //Consume the 'in'
@@ -682,6 +676,7 @@ namespace Kaleidoscope.Core
 		/// Parses the loaded tokens
 		/// </summary>
 		/// <returns>A syntax tree</returns>
+		/// <exception cref="ParserException">If the input was invalid</exception>
 		public IEnumerable<AbstractSyntaxTree> Parse()
 		{
 			this.NextToken();

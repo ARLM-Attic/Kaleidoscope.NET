@@ -156,6 +156,10 @@ namespace Kaleidoscope.Core
 					generatorData.ILGenerator.Emit(OpCodes.Ldloc, varSymbol.LocalVariable);
 				}
 			}
+			else
+			{
+				throw new CodeGeneratorException("Variable '" + this.Name + "' not found.");
+			}
 		}
 
 		public override string ToString()
@@ -603,21 +607,28 @@ namespace Kaleidoscope.Core
 				symbolTable = symbolTable.Add(currentArg, new FunctionArgumentSymbol(i));
 			}
 
-			codeGenerator.Methods.Add(funcName, function);
-			
-			//Emit the method
-			this.Body.GenerateCode(
-				codeGenerator,
-				new SyntaxTreeGeneratorData(generator, symbolTable));
-
-			generator.Emit(OpCodes.Ret);
-
-			//If a binary operator, add it to the operator table
-			if (this.Prototype.IsBinaryOperator)
+			if (!codeGenerator.Methods.ContainsKey(funcName))
 			{
-				codeGenerator.Parser.DefineBinaryOperator(
-					this.Prototype.OperatorName.Value,
-					this.Prototype.Precedence);
+				codeGenerator.Methods.Add(funcName, function);
+
+				//Emit the method
+				this.Body.GenerateCode(
+					codeGenerator,
+					new SyntaxTreeGeneratorData(generator, symbolTable));
+
+				generator.Emit(OpCodes.Ret);
+
+				//If a binary operator, add it to the operator table
+				if (this.Prototype.IsBinaryOperator)
+				{
+					codeGenerator.Parser.DefineBinaryOperator(
+						this.Prototype.OperatorName.Value,
+						this.Prototype.Precedence);
+				}
+			}
+			else
+			{
+				throw new CodeGeneratorException("Function '" + funcName + "' is already defined.");
 			}
 		}
 
@@ -688,8 +699,31 @@ namespace Kaleidoscope.Core
 			Type[] typeArgs = this.Prototype.Arguments.Select(_ => typeof(double)).ToArray();
 
 			Type funcClass = Type.GetType(funcClassName);
-			MethodInfo func = funcClass.GetMethod(funcName, typeArgs);
-			codeGenerator.Methods[this.Prototype.Name] = func;
+
+			if (funcClass != null)
+			{
+				MethodInfo func = funcClass.GetMethod(funcName, typeArgs);
+
+				if (func != null)
+				{
+					if (func.ReturnType == typeof(double) || func.ReturnType == typeof(void))
+					{
+						codeGenerator.Methods[this.Prototype.Name] = func;
+					}
+					else
+					{
+						throw new CodeGeneratorException("External function must return type of double or void. Return type: " + func.ReturnType.Name);
+					}
+				}
+				else
+				{
+					throw new CodeGeneratorException("Could not find method '" + funcName + "' in class '" + funcClassName + "'.");
+				}
+			}
+			else
+			{
+				throw new CodeGeneratorException("Could not find class '" + funcClassName + "'.");
+			}
 		}
 
 		public override string ToString()
