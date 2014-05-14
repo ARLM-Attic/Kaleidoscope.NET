@@ -708,7 +708,14 @@ namespace Kaleidoscope.Core
 				{
 					if (func.ReturnType == typeof(double) || func.ReturnType == typeof(void))
 					{
-						codeGenerator.Methods[this.Prototype.Name] = func;
+						if (!codeGenerator.Methods.ContainsKey(this.Prototype.Name))
+						{
+							codeGenerator.Methods[this.Prototype.Name] = func;
+						}
+						else
+						{
+							throw new CodeGeneratorException("The function '" + this.Prototype.Name + "' is already defined.");
+						}
 					}
 					else
 					{
