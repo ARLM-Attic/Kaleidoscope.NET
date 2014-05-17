@@ -67,6 +67,16 @@ namespace Kaleidoscope
 								Console.WriteLine("Defined function '" + funcTree.Prototype.Name + "'");
 							}
 						}
+
+						if (currentTree is ExternalFunctionSyntaxTree)
+						{
+							ExternalFunctionSyntaxTree funcTree = (ExternalFunctionSyntaxTree)currentTree;
+
+							if (funcTree.Prototype.Name != "")
+							{
+								Console.WriteLine("Defined external function '" + funcTree.Prototype.Name + "' referencing: " + funcTree.FuncReference);
+							}
+						}
 					}
 
 					if (codeGenerator.Methods.ContainsKey("main"))

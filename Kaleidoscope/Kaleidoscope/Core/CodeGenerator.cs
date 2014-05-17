@@ -53,8 +53,9 @@ namespace Kaleidoscope.Core
 		/// Generates a function call
 		/// </summary>
 		/// <param name="functionName">The name of the function to call</param>
-		/// <param name="generatorData">The generator data for the current syntax tree</param>
-		public void GenerateFunctionCall(string functionName, SyntaxTreeGeneratorData generatorData)
+		/// <param name="syntaxTree">The syntax tree</param>
+		/// <param name="generatorData">The generator data for the syntax tree</param>
+		public void GenerateFunctionCall(string functionName, AbstractSyntaxTree syntaxTree, SyntaxTreeGeneratorData generatorData)
 		{
 			if (this.Methods.ContainsKey(functionName))
 			{
@@ -70,7 +71,7 @@ namespace Kaleidoscope.Core
 			}
 			else
 			{
-				throw new CodeGeneratorException("Function '" + functionName + "' not found.");
+				throw new CodeGeneratorException("Function '" + functionName + "' not found.", syntaxTree);
 			}
 		}
 

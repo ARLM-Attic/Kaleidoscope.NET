@@ -158,7 +158,7 @@ namespace Kaleidoscope.Core
 			}
 			else
 			{
-				throw new CodeGeneratorException("Variable '" + this.Name + "' not found.");
+				throw new CodeGeneratorException("Variable '" + this.Name + "' not found.", this);
 			}
 		}
 
@@ -262,6 +262,7 @@ namespace Kaleidoscope.Core
 			{
 				codeGenerator.GenerateFunctionCall(
 					"binary" + this.op,
+					this,
 					generatorData);
 			}
 		}
@@ -323,6 +324,7 @@ namespace Kaleidoscope.Core
 
 			codeGenerator.GenerateFunctionCall(
 				"unary" + this.op,
+				this,
 				generatorData);
 		}
 
@@ -386,6 +388,7 @@ namespace Kaleidoscope.Core
 
 			codeGenerator.GenerateFunctionCall(
 				this.funcName,
+				this,
 				generatorData);
 		}
 
@@ -628,7 +631,7 @@ namespace Kaleidoscope.Core
 			}
 			else
 			{
-				throw new CodeGeneratorException("Function '" + funcName + "' is already defined.");
+				throw new CodeGeneratorException("Function '" + funcName + "' is already defined.", this);
 			}
 		}
 
@@ -699,37 +702,33 @@ namespace Kaleidoscope.Core
 			Type[] typeArgs = this.Prototype.Arguments.Select(_ => typeof(double)).ToArray();
 
 			Type funcClass = Type.GetType(funcClassName);
-
-			if (funcClass != null)
+			
+			if (funcClass == null)
 			{
-				MethodInfo func = funcClass.GetMethod(funcName, typeArgs);
+				throw new CodeGeneratorException("Could not find class '" + funcClassName + "'.", this);
+			}
 
-				if (func != null)
+			MethodInfo func = funcClass.GetMethod(funcName, typeArgs);
+
+			if (func == null)
+			{
+				throw new CodeGeneratorException("Could not find method '" + funcName + "' in class '" + funcClassName + "'.", this);
+			}
+
+			if (func.ReturnType == typeof(double) || func.ReturnType == typeof(void))
+			{
+				if (!codeGenerator.Methods.ContainsKey(this.Prototype.Name))
 				{
-					if (func.ReturnType == typeof(double) || func.ReturnType == typeof(void))
-					{
-						if (!codeGenerator.Methods.ContainsKey(this.Prototype.Name))
-						{
-							codeGenerator.Methods[this.Prototype.Name] = func;
-						}
-						else
-						{
-							throw new CodeGeneratorException("The function '" + this.Prototype.Name + "' is already defined.");
-						}
-					}
-					else
-					{
-						throw new CodeGeneratorException("External function must return type of double or void. Return type: " + func.ReturnType.Name);
-					}
+					codeGenerator.Methods[this.Prototype.Name] = func;
 				}
 				else
 				{
-					throw new CodeGeneratorException("Could not find method '" + funcName + "' in class '" + funcClassName + "'.");
+					throw new CodeGeneratorException("The function '" + this.Prototype.Name + "' is already defined.", this);
 				}
 			}
 			else
 			{
-				throw new CodeGeneratorException("Could not find class '" + funcClassName + "'.");
+				throw new CodeGeneratorException("External function must return type of double or void. Return type: " + func.ReturnType.Name, this);
 			}
 		}
 
