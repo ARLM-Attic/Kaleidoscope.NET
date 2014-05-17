@@ -48,10 +48,6 @@ namespace Kaleidoscope.Core
 		/// Closes the current program
 		/// </summary>
 		/// <param name="value">The exitCode</param>
-		//public static void Exit(double exitCode)
-		//{
-		//	System.Environment.Exit((int)exitCode);
-		//}
 		public static void Exit()
 		{
 			System.Environment.Exit(0);

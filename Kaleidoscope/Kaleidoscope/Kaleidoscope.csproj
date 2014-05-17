@@ -50,6 +50,7 @@
     <Compile Include="Core\Parser.cs" />
     <Compile Include="Core\CodeGeneratorException.cs" />
     <Compile Include="Core\ParserException.cs" />
+    <Compile Include="Core\Session.cs" />
     <Compile Include="Core\StandardLibrary.cs" />
     <Compile Include="Core\Token.cs" />
     <Compile Include="Program.cs" />

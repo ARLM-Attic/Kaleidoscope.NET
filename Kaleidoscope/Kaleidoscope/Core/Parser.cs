@@ -15,7 +15,7 @@ namespace Kaleidoscope.Core
 		#region Fields
 		private IEnumerable<Token> tokens;
 		private Token currentToken;
-		private Dictionary<char, int> binaryOperatorPrecedence;
+		private IDictionary<char, int> binaryOperatorPrecedence;
 		#endregion
 
 		#region Constructors
@@ -23,16 +23,41 @@ namespace Kaleidoscope.Core
 		/// Creates a new parser
 		/// </summary>
 		/// <param name="tokens">The tokens</param>
-		public Parser(IEnumerable<Token> tokens)
+		/// <param name="binaryOperatorPrecedence">The binary operator precedence table</param>
+		public Parser(IEnumerable<Token> tokens, IDictionary<char, int> binaryOperatorPrecedence = null)
 		{
 			this.tokens = tokens;
 			this.currentToken = null;
 
-			this.binaryOperatorPrecedence = new Dictionary<char, int>();
-			this.binaryOperatorPrecedence.Add('<', 10);
-			this.binaryOperatorPrecedence.Add('+', 20);
-			this.binaryOperatorPrecedence.Add('-', 20);
-			this.binaryOperatorPrecedence.Add('*', 40);
+			if (binaryOperatorPrecedence == null)
+			{
+				this.binaryOperatorPrecedence = new Dictionary<char, int>();
+			}
+			else
+			{
+				this.binaryOperatorPrecedence = binaryOperatorPrecedence;
+			}
+
+			//This operators must exist
+			if (!this.binaryOperatorPrecedence.ContainsKey('<'))
+			{
+				this.binaryOperatorPrecedence.Add('<', 10);
+			}
+
+			if (!this.binaryOperatorPrecedence.ContainsKey('+'))
+			{
+				this.binaryOperatorPrecedence.Add('+', 20);
+			}
+
+			if (!this.binaryOperatorPrecedence.ContainsKey('-'))
+			{
+				this.binaryOperatorPrecedence.Add('-', 20);
+			}
+
+			if (!this.binaryOperatorPrecedence.ContainsKey('*'))
+			{
+				this.binaryOperatorPrecedence.Add('*', 40);
+			}
 		}
 		#endregion
 
@@ -660,16 +685,6 @@ namespace Kaleidoscope.Core
 			}
 
 			return null;
-		}
-
-		/// <summary>
-		/// Resets the parser with the given tokens
-		/// </summary>
-		/// <param name="tokens">The tokens</param>
-		public void Reset(IEnumerable<Token> tokens)
-		{
-			this.tokens = tokens;
-			this.currentToken = null;
 		}
 
 		/// <summary>

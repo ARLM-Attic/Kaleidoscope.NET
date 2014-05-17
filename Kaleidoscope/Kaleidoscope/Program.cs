@@ -41,24 +41,21 @@ namespace Kaleidoscope
 
 			//First add the standard library
 			Lexer lexer = new Lexer();
-			Parser parser = new Parser(null);
-			CodeGenerator codeGenerator = new CodeGenerator(parser);
+			Session session = new Session();
+			CodeGenerator codeGenerator = new CodeGenerator(session);
 			StandardLibrary.AddStandardLibrary(codeGenerator);
 
 			while (true)
 			{
-				//Console.Write("> ");
-
 				try
 				{
 					string input = Console.ReadLine();
 					var tokens = lexer.Tokenize(input);
 
-					parser.Reset(tokens);
+					Parser parser = new Parser(tokens, session.BinaryOperatorPrecedence);
 
 					foreach (var currentTree in parser.Parse())
 					{
-						//Console.WriteLine(currentTree);
 						currentTree.GenerateCode(codeGenerator, SyntaxTreeGeneratorData.Empty);
 
 						if (currentTree is FunctionSyntaxTree)
@@ -76,18 +73,19 @@ namespace Kaleidoscope
 					{
 						var mainMethod = codeGenerator.Methods["main"];
 						mainMethod.Invoke(null, null);
-						codeGenerator.Methods.Remove("main");
 					}
 				}
-				catch(ParserException e)
+				catch (ParserException e)
 				{
 					Console.WriteLine(e.Message);
 				}
-				catch(CodeGeneratorException e)
+				catch (CodeGeneratorException e)
 				{
 					Console.WriteLine(e.Message);
 				}
+
+				codeGenerator.Methods.Remove("main");
 			}
-        }
+		}
     }
 }

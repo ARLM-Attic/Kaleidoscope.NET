@@ -16,37 +16,35 @@ namespace Kaleidoscope.Core
 	{
 
 		#region Fields
-		private Dictionary<string, MethodInfo> methods;
-		private readonly Parser parser;
+		private readonly Session session;
 		#endregion
 
 		#region Constructors
 		/// <summary>
 		/// Creates a new code generator
 		/// </summary>
-		/// <param name="parser">The parser</param>
-		public CodeGenerator(Parser parser)
+		/// <param name="parser">The session</param>
+		public CodeGenerator(Session session)
 		{
-			this.parser = parser;
-			this.methods = new Dictionary<string, MethodInfo>();
+			this.session = session;
 		}
 		#endregion
 
 		#region Properties
 		/// <summary>
-		/// Returns the parser for the generator
+		/// Returns the session
 		/// </summary>
-		public Parser Parser
+		public Session Session
 		{
-			get { return this.parser; }
+			get { return this.session; }
 		}
 
 		/// <summary>
 		/// Returns the generated methods
 		/// </summary>
-		public Dictionary<string, MethodInfo> Methods
+		public IDictionary<string, MethodInfo> Methods
 		{
-			get { return this.methods; }
+			get { return this.session.Methods; }
 		}
 		#endregion
 
@@ -85,7 +83,7 @@ namespace Kaleidoscope.Core
 		public void DefineBinaryOperator(char operatorChar, int precedence, MethodInfo opFunc)
 		{
 			//Add the operator to the operator table
-			this.Parser.DefineBinaryOperator(operatorChar, precedence);
+			this.Session.DefineBinaryOperator(operatorChar, precedence);
 			this.Methods["binary" + operatorChar] = opFunc;
 		}
 

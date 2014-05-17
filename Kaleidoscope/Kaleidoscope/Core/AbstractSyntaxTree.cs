@@ -621,7 +621,7 @@ namespace Kaleidoscope.Core
 				//If a binary operator, add it to the operator table
 				if (this.Prototype.IsBinaryOperator)
 				{
-					codeGenerator.Parser.DefineBinaryOperator(
+					codeGenerator.Session.DefineBinaryOperator(
 						this.Prototype.OperatorName.Value,
 						this.Prototype.Precedence);
 				}
