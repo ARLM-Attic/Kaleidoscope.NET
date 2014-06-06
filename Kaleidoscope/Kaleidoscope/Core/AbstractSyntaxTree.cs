@@ -599,7 +599,7 @@ namespace Kaleidoscope.Core
                 funcName = "main";
             }
 
-            DynamicMethod function = new DynamicMethod(funcName, returnType, argumentTypes);
+            var function = new DynamicMethod(funcName, returnType, argumentTypes);
 			var generator = function.GetILGenerator();
 
 			var symbolTable = ImmutableDictionary.Create<string, Symbol>();
@@ -695,6 +695,7 @@ namespace Kaleidoscope.Core
 		#region Methods
 		public override void GenerateCode(CodeGenerator codeGenerator, SyntaxTreeGeneratorData generatorData)
 		{
+			//Find the .NET class and method reference
 			string[] splitedFuncRef = this.FuncReference.Split('.');
 			string funcClassName = string.Join(".", splitedFuncRef.Take(splitedFuncRef.Length - 1));
 			string funcName = splitedFuncRef.Last();

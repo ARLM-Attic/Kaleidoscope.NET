@@ -23,19 +23,19 @@ namespace Kaleidoscope.Core
 		/// Creates a new parser
 		/// </summary>
 		/// <param name="tokens">The tokens</param>
-		/// <param name="binaryOperatorPrecedence">The binary operator precedence table</param>
-		public Parser(IEnumerable<Token> tokens, IDictionary<char, int> binaryOperatorPrecedence = null)
+		/// <param name="binaryOperatorPrecedences">The binary operator precedence table</param>
+		public Parser(IEnumerable<Token> tokens, IDictionary<char, int> binaryOperatorPrecedences = null)
 		{
 			this.tokens = tokens;
 			this.currentToken = null;
 
-			if (binaryOperatorPrecedence == null)
+			if (binaryOperatorPrecedences == null)
 			{
 				this.binaryOperatorPrecedence = new Dictionary<char, int>();
 			}
 			else
 			{
-				this.binaryOperatorPrecedence = binaryOperatorPrecedence;
+				this.binaryOperatorPrecedence = binaryOperatorPrecedences;
 			}
 
 			//This operators must exist
@@ -86,7 +86,7 @@ namespace Kaleidoscope.Core
 		{
 			this.currentToken = this.tokens.FirstOrDefault();
 			this.tokens = this.tokens.Skip(1);
-		 }
+		}
 
 		/// <summary>
 		/// Parses an expression
@@ -140,7 +140,7 @@ namespace Kaleidoscope.Core
 		}
 
 		/// <summary>
-		/// Parses the right hand side of  binary operator expression
+		/// Parses the right hand side of binary operator expression
 		/// </summary>
 		/// <param name="expressionPrecedence">The expression precedence</param>
 		/// <param name="leftHandSide">The left hand side</param>
@@ -177,8 +177,8 @@ namespace Kaleidoscope.Core
 					return null;
 				}
 
-				// If BinOp binds less tightly with RHS than the operator after RHS, let
-				// the pending operator take RHS as its LHS.
+				//If the bin op binds less tightly with RHS than the operator after RHS, let
+				//the pending operator take RHS as its LHS.
 				int nextPrec = this.GetTokenPrecedence();
 				if (tokenPrec < nextPrec)
 				{
@@ -327,11 +327,6 @@ namespace Kaleidoscope.Core
 				{
 					ExpressionSyntaxTree arg = this.ParseExpression(true);
 
-					//if (arg == null)
-					//{
-					//	return null;
-					//}
-
 					if (arg != null)
 					{
 						args.Add(arg);
@@ -400,9 +395,9 @@ namespace Kaleidoscope.Core
 					{
 						if (numToken.Value < 1 || numToken.Value > 100)
 						{
-							throw new ParserException("Invalid precedecnce: must be 1..100");
+							throw new ParserException("Invalid precedecnce: must be in the range: 1..100");
 						}
-
+						
 						binaryPrecedence = (int)numToken.Value;
 						this.NextToken();
 					}

@@ -63,7 +63,7 @@ namespace Kaleidoscope.Core
 
 				generatorData.ILGenerator.EmitCall(OpCodes.Call, calledMethod, null);
 
-				//Because the language is pure func, when we call inpure functions return 0
+				//Because the language is expression based, when we call functions that return void we return 0
 				if (calledMethod.ReturnType == typeof(void))
 				{
 					generatorData.ILGenerator.Emit(OpCodes.Ldc_R8, 0.0);
@@ -80,7 +80,7 @@ namespace Kaleidoscope.Core
 		/// </summary>
 		/// <param name="operatorChar">The operator</param>
 		/// <param name="precedence">The precedence</param>
-		/// <param name="opFunc">The operation function</param>
+		/// <param name="opFunc">The function for the operator</param>
 		public void DefineBinaryOperator(char operatorChar, int precedence, MethodInfo opFunc)
 		{
 			//Add the operator to the operator table
@@ -92,7 +92,7 @@ namespace Kaleidoscope.Core
 		/// Defines a new unary operator
 		/// </summary>
 		/// <param name="operatorChar">The operator</param>
-		/// <param name="opFunc">The operation function</param>
+		/// <param name="opFunc">The function for the operator</param>
 		public void DefineUnaryOperator(char operatorChar, MethodInfo opFunc)
 		{
 			this.Methods["unary" + operatorChar] = opFunc;
