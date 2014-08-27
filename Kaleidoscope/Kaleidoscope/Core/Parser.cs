@@ -685,9 +685,9 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Parses the loaded tokens
 		/// </summary>
-		/// <returns>A syntax tree</returns>
+		/// <returns>A sequence of syntax tree</returns>
 		/// <exception cref="ParserException">If the input was invalid</exception>
-		public IEnumerable<AbstractSyntaxTree> Parse()
+		public IEnumerable<SyntaxTrees> Parse()
 		{
 			this.NextToken();
 			bool doParse = true;

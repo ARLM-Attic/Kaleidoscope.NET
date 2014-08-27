@@ -44,7 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\AbstractSyntaxTree.cs" />
+    <Compile Include="Core\SyntaxTrees.cs" />
     <Compile Include="Core\CodeGenerator.cs" />
     <Compile Include="Core\Lexer.cs" />
     <Compile Include="Core\Parser.cs" />

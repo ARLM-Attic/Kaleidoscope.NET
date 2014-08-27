@@ -11,17 +11,17 @@ namespace Kaleidoscope.Core
     /// </summary>
     public enum TokenType
     {
-        Eof,
-        Def,
-        Extern,
-        Identifier,
-        Number,
+		Eof,
+		Def,
+		Extern,
+		Identifier,
+		Number,
 		Character,
 		If,
 		Then,
 		Else,
-        For,
-        In,
+		For,
+		In,
 		Binary,
 		Unary
     }
@@ -160,7 +160,7 @@ namespace Kaleidoscope.Core
 
 		#region Constructors
 		/// <summary>
-		/// Creates an new character token
+		/// Creates a new character token
 		/// </summary>
 		/// <param name="value">The value of the token</param>
 		public CharacterToken(char value)

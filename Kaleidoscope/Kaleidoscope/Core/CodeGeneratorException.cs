@@ -14,14 +14,14 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Returns the syntax tree that caused the exception
 		/// </summary>
-		public AbstractSyntaxTree SyntaxTree { get; private set; }
+		public SyntaxTrees SyntaxTree { get; private set; }
 
 		/// <summary>
 		/// Creates a new code generator exception
 		/// </summary>
 		/// <param name="message">The error message</param>
 		/// <param name="syntaxTree">The syntax tree that caused the exception</param>
-		public CodeGeneratorException(string message, AbstractSyntaxTree syntaxTree)
+		public CodeGeneratorException(string message, SyntaxTrees syntaxTree)
 			: base(message)
 		{
 			this.SyntaxTree = syntaxTree;

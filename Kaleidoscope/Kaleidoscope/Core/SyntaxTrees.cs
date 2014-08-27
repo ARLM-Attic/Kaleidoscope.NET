@@ -12,53 +12,21 @@ namespace Kaleidoscope.Core
 	/// <summary>
 	/// Represents an abstract syntax tree
 	/// </summary>
-	public abstract class AbstractSyntaxTree
+	public abstract class SyntaxTrees
 	{
-
-		#region Fields
-
-		#endregion
-
-		#region Constructors
-
-		#endregion
-
-		#region Properties
-
-		#endregion
-
-		#region Methods
 		/// <summary>
 		/// Generates code for the current syntax tree
 		/// </summary>
 		/// <param name="codeGenerator">The code generator</param>
 		/// <param name="ilGenerator">The generator data</param>
 		public abstract void GenerateCode(CodeGenerator codeGenerator, SyntaxTreeGeneratorData generatorData);
-		#endregion
-
 	}
 
 	/// <summary>
 	/// Represents an expression syntax tree
 	/// </summary>
-	public abstract class ExpressionSyntaxTree : AbstractSyntaxTree
+	public abstract class ExpressionSyntaxTree : SyntaxTrees
 	{
-
-		#region Fields
-
-		#endregion
-
-		#region Constructors
-
-		#endregion
-
-		#region Properties
-
-		#endregion
-
-		#region Methods
-
-		#endregion
 
 	}
 
@@ -344,7 +312,7 @@ namespace Kaleidoscope.Core
 
 		#region Fields
 		private readonly string funcName;
-		private readonly List<ExpressionSyntaxTree> arguments;
+		private readonly IImmutableList<ExpressionSyntaxTree> arguments;
 		#endregion
 
 		#region Constructors
@@ -353,10 +321,10 @@ namespace Kaleidoscope.Core
 		/// </summary>
 		/// <param name="funcName">The function to call</param>
 		/// <param name="arguments">The arguments to call with</param>
-		public CallExpressionSyntaxTree(string funcName, List<ExpressionSyntaxTree> arguments)
+		public CallExpressionSyntaxTree(string funcName, IEnumerable<ExpressionSyntaxTree> arguments)
 		{
 			this.funcName = funcName;
-			this.arguments = arguments;
+			this.arguments = arguments.ToImmutableList();
 		}
 		#endregion
 
@@ -372,9 +340,9 @@ namespace Kaleidoscope.Core
 		/// <summary>
 		/// Returns the arguments
 		/// </summary>
-		public IReadOnlyList<ExpressionSyntaxTree> Arguments
+		public IImmutableList<ExpressionSyntaxTree> Arguments
 		{
-			get { return this.arguments.AsReadOnly(); }
+			get { return this.arguments; }
 		}
 		#endregion
 
